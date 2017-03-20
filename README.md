@@ -7,10 +7,15 @@
 The saferm command takes no options, everything will be moved regardless of whether or not it is a directory.  So the command to delete anything is as follows:
 
 ```bash
+# To delete files, directories, etc...
 saferm [filesToDelete...]
-```
 
-There are also commands to list the deleted files and empty the trash.  These commands are `lstr` and `emtr` respectively.
+# To show the contents of the trash bin
+lstr
+
+# To empty the trash bin
+emtr
+```
 
 *Note:* All groups of files deleted at the same time are put into a directory with the timestamp of their deletion time.
 
