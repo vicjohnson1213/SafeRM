@@ -10,7 +10,10 @@ The saferm command takes no options, everything will be moved regardless of whet
 # To delete files, directories, etc...
 saferm [filesToDelete...]
 
-# To show the contents of the trash bin
+# To restore a deleted group of files
+rstr <index of trash directory>
+
+# To show the contents of the trash bin as an indexed list
 lstr
 
 # To empty the trash bin

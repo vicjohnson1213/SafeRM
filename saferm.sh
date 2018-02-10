@@ -9,7 +9,14 @@ function myreadlink() {
 
 # ---------- Instead of removing files, just move them to a trash folder ----------
 export MY_TRASH_DIR="$HOME/.mytrash"
+
 function saferm {
+    # If there are no aruments, show the usage and exit
+    if [[ $# -eq 0 ]] ; then
+        echo "Usage: saferm file ..."
+        return 1
+    fi
+
     # Make sure ~/.mytrash exists, if it doesn't, then create it
     if [[ ! -e "$MY_TRASH_DIR" ]]; then
         mkdir "$MY_TRASH_DIR"
@@ -41,51 +48,35 @@ function saferm {
 
 # ---------- Used to restore a file/directory deleted with saferm ----------
 # Note: If dotfiles are not being restored, then add `shopt -s dotglob nullglob`
-# to your bashrc to include dotfiles in glob patterns.
+# to your bashrc to include dotfiles in glob patterns
 function rstr {
-    # Remove a trailing slash if there is one
-    target="${1%/}"
-
-    # Make sure dotfiles are included in globs so no files are left behind.
-    if [[ $(shopt -s) != *"dotglob"* ]]; then
-        echo ""
-        echo "Dotfiles will not be copied and will be removed from the trash.  In order"
-        echo "to copy dot files, add the following command to your .bashrc:"
-        echo ""
-        echo "    shopt -s dotglob nullglob"
-        echo ""
-
-        # Ask the user if they want to continue without setting dotglob
-        while true; do
-            read -p "Would you like to continue anyways? (y/n) " yn
-            case $yn in
-                [Yy]* )
-                    break
-                    ;;
-                [Nn]* )
-                    return
-                    ;;
-                * )
-                    echo "Please answer y or n"
-                    ;;
-            esac
-        done
+    # If there are no aruments, show the usage and exit
+    if [[ $# -eq 0 ]] ; then
+        echo "Usage: rstr <trash index>"
+        return 1
     fi
+
+    # Get the files so the target can be indexed
+    files=($MY_TRASH_DIR/*)
+
+    # Get the target trash directory
+    index="$(($1 - 1))"
+    target="${files[$index]}"
 
     # Make sure there is an old location file to read from
     if [[ -e "$target/.trash_old_location" ]]; then
-        # Read the first line of the old location file.. aka the old location
+        # Read the first line of the old location file.. i.e. the old location
         location=$(head -n 1 "$target/.trash_old_location")
 
         # Make sure the old location still exists
         if [[ -d "$location" ]]; then
-            # Move everything to the old location
-            mv "$target"/* "$location"
+            # Remove the location file so it isn't restored.
+            \rm "$target/.trash_old_location"
 
-            # Remove the .trash_old_location file from the restored stuff and
-            # remove the folder from the trash that used to contain the restored
-            # stuff.
-            \rm "$location/.trash_old_location"
+            # Move everything to the old location
+            cp -rp "$target/." "$location"
+
+            # remove the folder from the trash that used to contain the restored stuff
             \rm -rf "$target"
         else
             echo "The containing directory no longer exists."
@@ -98,5 +89,5 @@ function rstr {
 }
 
 # ---------- Set aliases for safe removal and retrieval ----------
-alias emtr="\rm -rf $MY_TRASH_DIR/*"
-alias lstr="ls -al $MY_TRASH_DIR"
+alias emtr="\rm -rf $MY_TRASH_DIR/* && echo 'Trash successfully emptied.'"
+alias lstr="ls -A1 $MY_TRASH_DIR | nl -n ln"
