@@ -56,12 +56,11 @@ function rstr {
         return 1
     fi
 
-    # Get the files so the target can be indexed
-    files=($MY_TRASH_DIR/*)
+    # Get the directories so the target can be indexed
+    files=($MY_TRASH_DIR/*/)
 
     # Get the target trash directory
-    index="$(($1 - 1))"
-    target="${files[$index]}"
+    target="${files[$1]}"
 
     # Make sure there is an old location file to read from
     if [[ -e "$target/.trash_old_location" ]]; then
@@ -88,6 +87,29 @@ function rstr {
     fi
 }
 
+function lstr {
+    # If there is no argument, list the trash contents.
+    if [[ $# -eq 0 ]]; then
+        files=($MY_TRASH_DIR/*/)
+
+        for i in "${!files[@]}"; do
+            dir=$(basename "${files[$i]}")
+            printf "%s)\t%s\n" "$i" "$dir"
+        done
+
+        return 0
+    fi
+
+    # If there is an argument, print the contents of the targeted trash directory
+    # Get the files so the target can be indexed
+    trashDirs=($MY_TRASH_DIR/*/)
+
+    # Get the target trash directory
+    index="$(($1))"
+    target="${trashDirs[$index]}"
+
+    ls -A1 -I ".trash_old_location" "$target"
+}
+
 # ---------- Set aliases for safe removal and retrieval ----------
 alias emtr="\rm -rf $MY_TRASH_DIR/* && echo 'Trash successfully emptied.'"
-alias lstr="ls -A1 $MY_TRASH_DIR | nl -n ln"
