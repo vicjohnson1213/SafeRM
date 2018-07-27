@@ -101,7 +101,6 @@ function lstr {
     fi
 
     # If there is an argument, print the contents of the targeted trash directory
-    # Get the files so the target can be indexed
     trashDirs=($MY_TRASH_DIR/*/)
 
     # Get the target trash directory
